@@ -35,7 +35,9 @@ class GHLCustomProviderServices:
         # "imageUrl": "https://testsubscription.paypal.com"
         # }
         try:
+            print(json.dumps(data, indent=4))
             response = requests.post(url, headers=headers, params=params, json=data)
+            print(json.dumps(response.json(), indent=4))
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
@@ -47,7 +49,7 @@ class ChingUpServices:
    @staticmethod
    def integrate_chingup():
        data={
-        "name": "Company Paypal Integration",
+        "name": "Chingup",
         "description": "This payment gateway supports payments in India via UPI, Net banking, cards and wallets.",
         "paymentsUrl": "https://testpayment.paypal.com",
         "queryUrl": "https://testsubscription.paypal.com",
