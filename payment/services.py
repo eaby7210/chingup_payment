@@ -1,4 +1,5 @@
 import requests
+import json
 from django.conf import settings
 from core.models import OAuthToken
 from core.services import OAuthServices
@@ -15,7 +16,7 @@ class GHLCustomProviderServices:
         Creates a new custom provider integration with GHL.
         """
         
-        token_obj:OAuthToken = OAuthServices.get_valid_access_token_obj
+        token_obj:OAuthToken = OAuthServices.get_valid_access_token_obj()
         url = f"{BASE_URL}/payments/custom-provider/provider"
         headers = {
             "Accept": "application/json",
@@ -46,9 +47,14 @@ class ChingUpServices:
    @staticmethod
    def integrate_chingup():
        data={
-           
-       }
-       GHLCustomProviderServices.create_custom_provider_integration(data)
+        "name": "Company Paypal Integration",
+        "description": "This payment gateway supports payments in India via UPI, Net banking, cards and wallets.",
+        "paymentsUrl": "https://testpayment.paypal.com",
+        "queryUrl": "https://testsubscription.paypal.com",
+        "imageUrl": "https://testsubscription.paypal.com"
+        }
+       res =GHLCustomProviderServices.create_custom_provider_integration(data)
+       print(json.dumps(res, indent=4))
        
        
     # @staticmethod
