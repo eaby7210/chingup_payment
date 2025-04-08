@@ -43,6 +43,40 @@ class GHLCustomProviderServices:
         except requests.RequestException as e:
             print("Error while creating custom provider:", e)
             return None
+        
+        
+    @staticmethod
+    def create_provider_config(payload:dict):
+        """
+        Creates a provider config for the custom payment integration.
+        """
+
+        token_obj: OAuthToken = OAuthServices.get_valid_access_token_obj()
+        url = f"{BASE_URL}/payments/custom-provider/connect"
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {token_obj.access_token}",
+            "Content-Type": "application/json",
+            "Version": VERSION,
+        }
+        params = {
+            "locationId": token_obj.LocationId
+        }
+
+        try:
+            print("Sending provider config payload:")
+            print(json.dumps(payload, indent=4))
+
+            response = requests.post(url, headers=headers, params=params, json=payload)
+
+            print("Provider config response:")
+            print(json.dumps(response.json(), indent=4))
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            print("Error while creating provider config:", e)
+            return None
+
 
 class ChingUpServices:
    
