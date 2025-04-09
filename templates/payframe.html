@@ -15,7 +15,7 @@
     {% load bootstrap5 %}
     {% bootstrap_css %}
 </head>
-<body>
+<body style="background-color:#000000c7">
     <!-- Loading message displayed initially -->
     <div id="loading_message">
         Waiting for payment information...
@@ -23,8 +23,8 @@
     
     <!-- Iframe container (will be filled dynamically) -->
     <div id="iframe_container"></div>
-    <div class="container d-flex justify-content-between align-items-center py-3 border-top">
-        <span class="text-muted">Powered by Vyntec</span>
+    <div class="container d-flex justify-content-center align-items-center py-3 border-top">
+        <span class="text-muted px-2">Powered by Vyntec</span>
         <img 
           src="https://storage.googleapis.com/msgsndr/h9yc7BtsLVSheMdIWErB/media/67f6eb206dd5a5e6ce3cc545.png" 
           alt="Vyntec Logo" 
@@ -79,11 +79,17 @@
                 iframe.id = "payment_iframe";
                 iframe.src = "https://chingup.com/card_payment/";
                 iframe.style.width = "100%";
-                iframe.style.height = "500px";
+                iframe.style.height = "1000px";
                 iframe.frameBorder = "0";
+                iframe.style.display="none"
 
                 iframeContainer.appendChild(iframe);
-                loadingMessage.style.display = "none";
+
+                setTimeout(()=>{
+                    loadingMessage.style.display = "none";
+                    iframe.style.display="flex"
+                },1000)
+               
 
                 // 4️⃣ Send data to Chingup iframe once it's loaded
                 iframe.onload = function () {
