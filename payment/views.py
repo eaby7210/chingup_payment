@@ -28,20 +28,20 @@ def payment_verify(request):
         print(json.dumps(data, indent=4))
 
 
-        # url = 'https://chingup.com/api/verify_transaction.php'
-        # data = {
-        #     'merchant_id': '3023d9618e722844c74c33fcad28f130',
-        #     'ref_number': '000011112',
-        #     'transaction_id': '2d5491c573a96002',
-        #     'api_key': 'MERCHANT_UNIQUE_API_KEY'
-        # }
+        url = 'https://chingup.com/api/verify_transaction.php'
+        data = {
+            'merchant_id': 'd8f4a3b9e11cd28b4e6cdfe83942e681',
+            'ref_number': data.get("chargeId"),
+            'transaction_id': data.get("transactionId"),
+            'api_key': 'db8a2e2842e3980e182cd510f509bf47fd92bb4167e6cbc257d09bf9cc97d6f1'
+        }
 
-        # response = requests.post(url, data=data)
-        # response_data = response.json()
+        response = requests.post(url, data=data)
+        response_data = response.json()
 
-        # if response_data.get('status') == 'success':
-        #     print(response_data['data'])
-        # else:
-        #     print("Error:", response_data.get('message'))
+        if response_data.get('status') == 'success':
+            print(response_data['data'])
+        else:
+            print("Error:", response_data.get('message'))
         
         return JsonResponse()
