@@ -41,7 +41,9 @@ def payment_verify(request):
 
         if response_data.get('status') == 'success':
             print(response_data['data'])
+            return JsonResponse({"success":True})
         else:
             print("Error:", response_data.get('message'))
+            return JsonResponse({"failed":True})
+
         
-        return JsonResponse()
