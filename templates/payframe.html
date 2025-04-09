@@ -57,7 +57,6 @@
             }
 
             console.log("📥 Received event data:", data);
-
             if (data?.type === "payment_initiate_props") {
                 const {
                     amount,
@@ -65,24 +64,27 @@
                     transactionId,
                     publishableKey // merchant_id
                 } = data;
-
+            
                 if (!amount || !transactionId || !publishableKey) {
                     console.error("❌ Missing payment fields:", { amount, transactionId, publishableKey });
                     loadingMessage.innerHTML = "Error: Incomplete payment data. Please try again.";
                     return;
                 }
-
+            
                 console.log("✅ Valid payment data received:", JSON.stringify(data, null, 4));
-                setTimeout(()=>{
+            
+                setTimeout(() => {
                     const iframe = document.createElement('iframe');
                     iframe.id = "payment_iframe";
                     iframe.src = "https://chingup.com/card_payment/";
                     iframe.style.width = "100%";
                     iframe.style.height = "1000px";
                     iframe.frameBorder = "0";
-                    iframe.style.display="none"
+                    iframe.style.display = "none";
+            
                     iframe.onload = function () {
-                       
+                        iframe.style.display = "block"; // ✅ Show after load
+            
                         const css_configs = {
                             primaryColor: '#ff0000',
                             backgroundColor: '#ffffff00',
@@ -91,13 +93,14 @@
                             fontSize: '18px',
                             cssClasses: `
                                 .container {
-                                padding-top: 10px;
+                                    padding-top: 10px;
                                 }
                                 .card {
-                                background: #121212;
+                                    background: #121212;
                                 }
                             `
-                            };
+                        };
+            
                         const chingupPaymentData = {
                             mode: 'production',
                             amount: parseFloat(amount),
@@ -108,22 +111,15 @@
                             css_config: css_configs,
                             require_billing_info: true,
                         };
-                        iframeContainer.appendChild(iframe);
+            
                         console.log("📤 Sending payment data to Chingup:", chingupPaymentData);
                         iframe.contentWindow.postMessage(chingupPaymentData, "*");
                     };
-    
-                    iframeContainer.appendChild(iframe);
-    
-                    
-                   
-    
-                    // 4️⃣ Send data to Chingup iframe once it's loaded
-                   
-                },5000)
-                // 3️⃣ Create iframe only after receiving valid payment data
-               
+            
+                    iframeContainer.appendChild(iframe); 
+                }, 5000);
             }
+            
         });
 
         // 5️⃣ Listen for Chingup's response
