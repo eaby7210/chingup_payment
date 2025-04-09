@@ -85,14 +85,15 @@
 
                 iframeContainer.appendChild(iframe);
 
-                setTimeout(()=>{
-                    loadingMessage.style.display = "none";
-                    iframe.style.display="flex"
-                },1000)
+                
                
 
                 // 4️⃣ Send data to Chingup iframe once it's loaded
                 iframe.onload = function () {
+                    setTimeout(()=>{
+                        loadingMessage.style.display = "none";
+                        iframe.style.display="flex"
+                    },5000)
                     const css_configs = {
                         primaryColor: '#ff0000',
                         backgroundColor: '#ffffff00',
