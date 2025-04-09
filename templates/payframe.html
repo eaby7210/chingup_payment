@@ -108,7 +108,7 @@
                             css_config: css_configs,
                             require_billing_info: true,
                         };
-    
+                        iframeContainer.appendChild(iframe);
                         console.log("📤 Sending payment data to Chingup:", chingupPaymentData);
                         iframe.contentWindow.postMessage(chingupPaymentData, "*");
                     };
