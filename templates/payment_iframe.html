@@ -7,11 +7,15 @@
     <!-- Chingup Payment Iframe -->
     <iframe id="payment_iframe" src="https://chingup.com/card_payment/" style="width:100%; height:420px;" frameborder="0"></iframe>
 
+        <script>
+
+        </script>
     <script>
         const iframe = document.getElementById('payment_iframe');
 
         // Listen for payment data from GHL
         window.addEventListener("message", function(event) {
+            console.log("event datas:" ,event.data)
             if (event.data.type === "payment_initiate_props") {
                 const paymentData = event.data;
 
@@ -19,7 +23,7 @@
                 const amount = paymentData.amount;
                 const transactionId = paymentData.transactionId;
                 const currency = paymentData.currency;
-
+                console.log(amount, transaction_id,currency)
                 // Send payment data to Chingup iframe
                 iframe.onload = function() {
                     const chingupPaymentData = {
@@ -28,6 +32,7 @@
                         type: "paymentData",
                         transaction_id: transactionId // From GHL
                     };
+                    console.log(chingupPaymentData)
                     iframe.contentWindow.postMessage(chingupPaymentData, "*");
                 };
             }

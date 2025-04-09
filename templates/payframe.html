@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Page</title>
+</head>
+<body>
+    <!-- Chingup Payment Iframe -->
+    <iframe id="payment_iframe" src="https://chingup.com/card_payment/" style="width:100%; height:420px;" frameborder="0"></iframe>
+
+    <script>
+        const iframe = document.getElementById('payment_iframe');
+
+        // 1️⃣ Dispatch 'custom_provider_ready' to notify GHL that iframe is ready
+        iframe.onload = function () {
+            console.log("Iframe loaded. Dispatching 'custom_provider_ready' event to GHL.");
+            window.parent.postMessage(JSON.stringify({ type: 'custom_provider_ready', loaded: true }), "*");
+
+        };
+
+        // 2️⃣ Listen for payment data event from GHL
+        window.addEventListener("message", function(event) {
+            console.log("event data:");
+            console.log(event.data);
+        
+            let data = event.data;
+        
+            // ✅ Parse if it's a string
+            if (typeof data === "string") {
+                try {
+                    data = JSON.parse(data);
+                } catch (e) {
+                    console.error(" Failed to parse message data:", e);
+                    return;
+                }
+            }
+        
+            if (data?.type === "payment_initiate_props") {
+                // 3️⃣ Log all payment details received from GHL
+                console.log("✅ Received payment_initiate_props from GHL:");
+                console.log(JSON.stringify(data, null, 4));
+        
+                const {
+                    amount,
+                    currency,
+                    transactionId
+                } = data;
+        
+                // 4️⃣ Send payment data to Chingup iframe
+                const chingupPaymentData = {
+                    amount: parseFloat(amount), // ensure it's a number
+                    merchant_id: 'YOUR_MERCHANT_ID',
+                    type: "paymentData",
+                    transaction_id: transactionId
+                };
+        
+                console.log("🚀 Sending payment data to Chingup iframe:");
+                console.log(JSON.stringify(chingupPaymentData, null, 4));
+        
+                iframe.contentWindow.postMessage(chingupPaymentData, "*");
+            }
+        });
+        
+
+        // 5️⃣ Listen for payment response from Chingup iframe
+        window.addEventListener("message", function(event) {
+            let response = event.data;
+            console.log("chingup event")
+            console.log(JSON.stringify(event.data))
+            if (typeof response === "string") {
+                try {
+                    response = JSON.parse(response);
+                } catch (e) {
+                    console.error("❌ Failed to parse response from Chingup:", e);
+                    return;
+                }
+            }
+        
+            if (response && typeof response === 'object' && 'success' in response) {
+                console.log("✅ Received payment response from Chingup iframe:");
+                console.log(JSON.stringify(response, null, 4));
+        
+                if (response.success) {
+                    // Dispatch success event to GHL
+                    console.log("✅ Dispatching 'custom_element_success_response' to GHL");
+                    window.parent.postMessage(JSON.stringify({
+                        type: 'custom_element_success_response',
+                        chargeId: response.transaction_id
+                    }), "*");
+                } else {
+                    // Dispatch error event to GHL
+                    console.log("❌ Dispatching 'custom_element_error_response' to GHL");
+                    window.parent.postMessage(JSON.stringify({
+                        type: 'custom_element_error_response',
+                        error: { description: response.message }
+                    }), "*");
+                }
+            }
+        });
+        
+    </script>
+</body>
+</html>
