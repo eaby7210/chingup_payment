@@ -19,8 +19,7 @@
 
         // 2️⃣ Listen for payment data event from GHL
         window.addEventListener("message", function(event) {
-            console.log("event data:");
-            console.log(event.data);
+            
         
             let data = event.data;
         
@@ -33,6 +32,8 @@
                     return;
                 }
             }
+            console.log("event data:");
+            {% comment %} console.log(JSON.stringify(data,null, 4)) {% endcomment %}
         
             if (data?.type === "payment_initiate_props") {
                 // 3️⃣ Log all payment details received from GHL
@@ -64,8 +65,6 @@
         // 5️⃣ Listen for payment response from Chingup iframe
         window.addEventListener("message", function(event) {
             let response = event.data;
-            console.log("chingup event")
-            console.log(JSON.stringify(event.data))
             if (typeof response === "string") {
                 try {
                     response = JSON.parse(response);
@@ -74,6 +73,8 @@
                     return;
                 }
             }
+            console.log("chingup event")
+            console.log(JSON.stringify(response,null,4))
         
             if (response && typeof response === 'object' && 'success' in response) {
                 console.log("✅ Received payment response from Chingup iframe:");
