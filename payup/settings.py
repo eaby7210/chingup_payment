@@ -138,22 +138,22 @@ REDIRECT_URI = os.environ.get('REDIRECT_URI')
 
 
 # # Chingup Configuration
-# CHINGUP_MERCHANT_ID = os.environ.get("MERCHANT_ID")
-# CHINGUP_MERCHANT_SANDBOX_ID = os.environ.get("MERCHANT_SANDBOX_ID")
+CHINGUP_MERCHANT_ID = os.environ.get("MERCHANT_ID")
+CHINGUP_MERCHANT_SANDBOX_ID = os.environ.get("MERCHANT_SANDBOX_ID")
 
-# CHINGUP_API_KEY = os.environ.get("API_KEY")
-# CHINGUP_API_KEY_SANDBOX = os.environ.get("API_KEY_SANDBOX")
+CHINGUP_API_KEY = os.environ.get("API_KEY")
+CHINGUP_API_KEY_SANDBOX = os.environ.get("API_KEY_SANDBOX")
 
-# CHINGUP_API_URL = os.environ.get("API_URL")
-# CHINGUP_API_URL_SANDBOX = os.environ.get("API_URL_SANDBOX")
+CHINGUP_API_URL = os.environ.get("API_URL")
+CHINGUP_API_URL_SANDBOX = os.environ.get("API_URL_SANDBOX")
 
 
 # Chingup Configuration
-if DEBUG:
-    CHINGUP_MERCHANT_ID = os.environ.get("MERCHANT_SANDBOX_ID")
-    CHINGUP_API_KEY = os.environ.get("API_KEY_SANDBOX")
-    CHINGUP_API_URL = os.environ.get("API_URL_SANDBOX")
-else:
-    CHINGUP_MERCHANT_ID = os.environ.get("MERCHANT_ID")
-    CHINGUP_API_KEY = os.environ.get("API_KEY")
-    CHINGUP_API_URL = os.environ.get("API_URL")
+# if DEBUG:
+#     CHINGUP_MERCHANT_ID = os.environ.get("MERCHANT_SANDBOX_ID")
+#     CHINGUP_API_KEY = os.environ.get("API_KEY_SANDBOX")
+#     CHINGUP_API_URL = os.environ.get("API_URL_SANDBOX")
+# else:
+#     CHINGUP_MERCHANT_ID = os.environ.get("MERCHANT_ID")
+#     CHINGUP_API_KEY = os.environ.get("API_KEY")
+#     CHINGUP_API_URL = os.environ.get("API_URL")

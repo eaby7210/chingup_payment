@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.conf import settings
 
 
 @csrf_exempt
@@ -15,7 +16,10 @@ def payment_view(request):
         
         return render(request,"payment_iframe.html",data)
     elif request.method =='GET':
-        return render(request,"payframe.html")
+        data={
+            'merchant_id':settings.CHINGUP_MERCHANT_SANDBOX_ID
+        }
+        return render(request,"payframe.html",data)
 
 @csrf_exempt
 def payment_verify(request):

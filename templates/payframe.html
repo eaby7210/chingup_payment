@@ -9,13 +9,11 @@
 
     <script>
         const iframe = document.getElementById('payment_iframe');
+        console.log("Iframe loaded. Dispatching 'custom_provider_ready' event to GHL.");
+        window.parent.postMessage(JSON.stringify({ type: 'custom_provider_ready', loaded: true }), "*");
 
         // 1️⃣ Dispatch 'custom_provider_ready' to notify GHL that iframe is ready
-        iframe.onload = function () {
-            console.log("Iframe loaded. Dispatching 'custom_provider_ready' event to GHL.");
-            window.parent.postMessage(JSON.stringify({ type: 'custom_provider_ready', loaded: true }), "*");
-
-        };
+       
 
         // 2️⃣ Listen for payment data event from GHL
         window.addEventListener("message", function(event) {
@@ -37,27 +35,30 @@
         
             if (data?.type === "payment_initiate_props") {
                 // 3️⃣ Log all payment details received from GHL
-                console.log("✅ Received payment_initiate_props from GHL:");
+                console.log("Received payment_initiate_props from GHL:");
                 console.log(JSON.stringify(data, null, 4));
         
                 const {
                     amount,
                     currency,
-                    transactionId
+                    transactionId,
+                    publishableKey
                 } = data;
         
-                // 4️⃣ Send payment data to Chingup iframe
                 const chingupPaymentData = {
-                    amount: parseFloat(amount), // ensure it's a number
-                    merchant_id: 'YOUR_MERCHANT_ID',
+                    amount: parseFloat(amount), 
+                    merchant_id: publishableKey,
                     type: "paymentData",
                     transaction_id: transactionId
                 };
         
-                console.log("🚀 Sending payment data to Chingup iframe:");
+                console.log(" Sending payment data to Chingup iframe:");
                 console.log(JSON.stringify(chingupPaymentData, null, 4));
-        
-                iframe.contentWindow.postMessage(chingupPaymentData, "*");
+                iframe.onload = function () {
+       
+
+                    iframe.contentWindow.postMessage(chingupPaymentData, "*");
+                };
             }
         });
         
@@ -69,7 +70,7 @@
                 try {
                     response = JSON.parse(response);
                 } catch (e) {
-                    console.error("❌ Failed to parse response from Chingup:", e);
+                    console.error(" Failed to parse response from Chingup:", e);
                     return;
                 }
             }
@@ -77,19 +78,20 @@
             console.log(JSON.stringify(response,null,4))
         
             if (response && typeof response === 'object' && 'success' in response) {
-                console.log("✅ Received payment response from Chingup iframe:");
+                console.log("Received payment response from Chingup iframe:");
                 console.log(JSON.stringify(response, null, 4));
         
                 if (response.success) {
                     // Dispatch success event to GHL
-                    console.log("✅ Dispatching 'custom_element_success_response' to GHL");
+                    console.log("Dispatching 'custom_element_success_response' to GHL");
                     window.parent.postMessage(JSON.stringify({
-                        type: 'custom_element_success_response',
-                        chargeId: response.transaction_id
+                        type: "verify",
+                        
+                        chargeId: response.ref_number,
                     }), "*");
                 } else {
                     // Dispatch error event to GHL
-                    console.log("❌ Dispatching 'custom_element_error_response' to GHL");
+                    console.log("Dispatching 'custom_element_error_response' to GHL");
                     window.parent.postMessage(JSON.stringify({
                         type: 'custom_element_error_response',
                         error: { description: response.message }
