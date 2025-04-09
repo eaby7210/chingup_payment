@@ -15,6 +15,7 @@ class OAuthServices:
     
     @staticmethod
     def get_valid_access_token_obj():
+        from django.conf import settings
         token_obj = OAuthToken.objects.first()  # Assuming one OAuth record, change if one per user
         
         if not token_obj:
@@ -28,6 +29,8 @@ class OAuthServices:
     @staticmethod
     def get_fresh_token(auth_code):
         '''Exchange authorization code for a fresh access token'''
+        
+        from django.conf import settings
         
         headers = {
         "Content-Type": "application/x-www-form-urlencoded"
