@@ -73,56 +73,56 @@
                 }
 
                 console.log("✅ Valid payment data received:", JSON.stringify(data, null, 4));
-
-                // 3️⃣ Create iframe only after receiving valid payment data
-                const iframe = document.createElement('iframe');
-                iframe.id = "payment_iframe";
-                iframe.src = "https://chingup.com/card_payment/";
-                iframe.style.width = "100%";
-                iframe.style.height = "1000px";
-                iframe.frameBorder = "0";
-                iframe.style.display="none"
-
-                iframeContainer.appendChild(iframe);
-
-                
-               
-
-                // 4️⃣ Send data to Chingup iframe once it's loaded
-                iframe.onload = function () {
-                    setTimeout(()=>{
-                        loadingMessage.style.display = "none";
-                        iframe.style.display="flex"
-                    },5000)
-                    const css_configs = {
-                        primaryColor: '#ff0000',
-                        backgroundColor: '#ffffff00',
-                        bodyColor: 'white',
-                        fontFamily: 'Montserrat',
-                        fontSize: '18px',
-                        cssClasses: `
-                            .container {
-                            padding-top: 10px;
-                            }
-                            .card {
-                            background: #121212;
-                            }
-                        `
+                setTimeout(()=>{
+                    const iframe = document.createElement('iframe');
+                    iframe.id = "payment_iframe";
+                    iframe.src = "https://chingup.com/card_payment/";
+                    iframe.style.width = "100%";
+                    iframe.style.height = "1000px";
+                    iframe.frameBorder = "0";
+                    iframe.style.display="none"
+                    iframe.onload = function () {
+                       
+                        const css_configs = {
+                            primaryColor: '#ff0000',
+                            backgroundColor: '#ffffff00',
+                            bodyColor: 'white',
+                            fontFamily: 'Montserrat',
+                            fontSize: '18px',
+                            cssClasses: `
+                                .container {
+                                padding-top: 10px;
+                                }
+                                .card {
+                                background: #121212;
+                                }
+                            `
+                            };
+                        const chingupPaymentData = {
+                            mode: 'production',
+                            amount: parseFloat(amount),
+                            currency: currency,
+                            merchant_id: publishableKey,
+                            transaction_id: transactionId,
+                            type: "paymentData",
+                            css_config: css_configs,
+                            require_billing_info: true,
                         };
-                    const chingupPaymentData = {
-                        mode: 'production',
-                        amount: parseFloat(amount),
-                        currency: currency,
-                        merchant_id: publishableKey,
-                        transaction_id: transactionId,
-                        type: "paymentData",
-                        css_config: css_configs,
-                        require_billing_info: true,
+    
+                        console.log("📤 Sending payment data to Chingup:", chingupPaymentData);
+                        iframe.contentWindow.postMessage(chingupPaymentData, "*");
                     };
-
-                    console.log("📤 Sending payment data to Chingup:", chingupPaymentData);
-                    iframe.contentWindow.postMessage(chingupPaymentData, "*");
-                };
+    
+                    iframeContainer.appendChild(iframe);
+    
+                    
+                   
+    
+                    // 4️⃣ Send data to Chingup iframe once it's loaded
+                   
+                },5000)
+                // 3️⃣ Create iframe only after receiving valid payment data
+               
             }
         });
 
