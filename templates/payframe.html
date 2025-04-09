@@ -2,104 +2,124 @@
 <html>
 <head>
     <title>Payment Page</title>
+    <style>
+        #loading_message {
+            text-align: center;
+            padding: 50px;
+            font-family: Arial, sans-serif;
+        }
+        #iframe_container {
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-    <!-- Chingup Payment Iframe -->
-    <iframe id="payment_iframe" src="https://chingup.com/card_payment/" style="width:100%; height:420px;" frameborder="0"></iframe>
+    <!-- Loading message displayed initially -->
+    <div id="loading_message">
+        Waiting for payment information...
+    </div>
+    
+    <!-- Iframe container (will be filled dynamically) -->
+    <div id="iframe_container"></div>
 
     <script>
-        const iframe = document.getElementById('payment_iframe');
-        console.log("Iframe loaded. Dispatching 'custom_provider_ready' event to GHL.");
+        const iframeContainer = document.getElementById('iframe_container');
+        const loadingMessage = document.getElementById('loading_message');
+
+        // Notify GHL that iframe is ready
+        console.log("Iframe host ready. Dispatching 'custom_provider_ready' to GHL.");
         window.parent.postMessage(JSON.stringify({ type: 'custom_provider_ready', loaded: true }), "*");
 
-        // 1️⃣ Dispatch 'custom_provider_ready' to notify GHL that iframe is ready
-       
-
-        // 2️⃣ Listen for payment data event from GHL
+        // 1️⃣ Listen for payment data from GHL
         window.addEventListener("message", function(event) {
-            
-        
             let data = event.data;
-        
-            // ✅ Parse if it's a string
+
+            // 2️⃣ Parse if it's a string
             if (typeof data === "string") {
                 try {
                     data = JSON.parse(data);
                 } catch (e) {
-                    console.error(" Failed to parse message data:", e);
+                    console.error("❌ Failed to parse event data:", e);
                     return;
                 }
             }
-            console.log("event data:");
-            {% comment %} console.log(JSON.stringify(data,null, 4)) {% endcomment %}
-        
+
+            console.log("📥 Received event data:", data);
+
             if (data?.type === "payment_initiate_props") {
-                // 3️⃣ Log all payment details received from GHL
-                console.log("Received payment_initiate_props from GHL:");
-                console.log(JSON.stringify(data, null, 4));
-        
                 const {
                     amount,
                     currency,
                     transactionId,
-                    publishableKey
+                    publishableKey // merchant_id
                 } = data;
-        
-                const chingupPaymentData = {
-                    amount: parseFloat(amount), 
-                    merchant_id: publishableKey,
-                    type: "paymentData",
-                    transaction_id: transactionId
-                };
-        
-                console.log(" Sending payment data to Chingup iframe:");
-                console.log(JSON.stringify(chingupPaymentData, null, 4));
-                iframe.onload = function () {
-       
 
+                if (!amount || !transactionId || !publishableKey) {
+                    console.error("❌ Missing payment fields:", { amount, transactionId, publishableKey });
+                    loadingMessage.innerHTML = "Error: Incomplete payment data. Please try again.";
+                    return;
+                }
+
+                console.log("✅ Valid payment data received:", JSON.stringify(data, null, 4));
+
+                // 3️⃣ Create iframe only after receiving valid payment data
+                const iframe = document.createElement('iframe');
+                iframe.id = "payment_iframe";
+                iframe.src = "https://chingup.com/card_payment/";
+                iframe.style.width = "100%";
+                iframe.style.height = "420px";
+                iframe.frameBorder = "0";
+
+                iframeContainer.appendChild(iframe);
+                loadingMessage.style.display = "none";
+
+                // 4️⃣ Send data to Chingup iframe once it's loaded
+                iframe.onload = function () {
+                    const chingupPaymentData = {
+                        amount: parseFloat(amount),
+                        currency: currency,
+                        merchant_id: publishableKey,
+                        transaction_id: transactionId,
+                        type: "paymentData"
+                    };
+
+                    console.log("📤 Sending payment data to Chingup:", chingupPaymentData);
                     iframe.contentWindow.postMessage(chingupPaymentData, "*");
                 };
             }
         });
-        
 
-        // 5️⃣ Listen for payment response from Chingup iframe
+        // 5️⃣ Listen for Chingup's response
         window.addEventListener("message", function(event) {
             let response = event.data;
+
             if (typeof response === "string") {
                 try {
                     response = JSON.parse(response);
                 } catch (e) {
-                    console.error(" Failed to parse response from Chingup:", e);
+                    console.error("❌ Failed to parse response from Chingup:", e);
                     return;
                 }
             }
-            console.log("chingup event")
-            console.log(JSON.stringify(response,null,4))
-        
+
+            console.log("📨 Received response from Chingup:", response);
+
             if (response && typeof response === 'object' && 'success' in response) {
-                console.log("Received payment response from Chingup iframe:");
-                console.log(JSON.stringify(response, null, 4));
-        
                 if (response.success) {
-                    // Dispatch success event to GHL
-                    console.log("Dispatching 'custom_element_success_response' to GHL");
+                    console.log("✅ Payment successful. Dispatching to GHL.");
                     window.parent.postMessage(JSON.stringify({
-                        type: "verify",
-                        
-                        chargeId: response.ref_number,
+                        type: 'custom_element_success_response',
+                        chargeId: String(response.ref_number || response.transaction_id || "N/A"),
                     }), "*");
                 } else {
-                    // Dispatch error event to GHL
-                    console.log("Dispatching 'custom_element_error_response' to GHL");
+                    console.warn("⚠️ Payment failed. Dispatching error to GHL.");
                     window.parent.postMessage(JSON.stringify({
                         type: 'custom_element_error_response',
-                        error: { description: response.message }
+                        error: { description: response.message || "Payment failed" }
                     }), "*");
                 }
             }
         });
-        
     </script>
 </body>
 </html>
