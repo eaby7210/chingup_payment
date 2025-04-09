@@ -12,6 +12,8 @@
             width: 100%;
         }
     </style>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
 </head>
 <body>
     <!-- Loading message displayed initially -->
@@ -21,6 +23,16 @@
     
     <!-- Iframe container (will be filled dynamically) -->
     <div id="iframe_container"></div>
+    <div class="container d-flex justify-content-between align-items-center py-3 border-top">
+        <span class="text-muted">Powered by Vyntec</span>
+        <img 
+          src="https://storage.googleapis.com/msgsndr/h9yc7BtsLVSheMdIWErB/media/67f6eb206dd5a5e6ce3cc545.png" 
+          alt="Vyntec Logo" 
+          class="img-fluid" 
+          style="height: 30px;"
+        >
+      </div>
+
 
     <script>
         const iframeContainer = document.getElementById('iframe_container');
@@ -67,7 +79,7 @@
                 iframe.id = "payment_iframe";
                 iframe.src = "https://chingup.com/card_payment/";
                 iframe.style.width = "100%";
-                iframe.style.height = "420px";
+                iframe.style.height = "500px";
                 iframe.frameBorder = "0";
 
                 iframeContainer.appendChild(iframe);
@@ -75,12 +87,30 @@
 
                 // 4️⃣ Send data to Chingup iframe once it's loaded
                 iframe.onload = function () {
+                    const css_configs = {
+                        primaryColor: '#ff0000',
+                        backgroundColor: '#ffffff00',
+                        bodyColor: 'white',
+                        fontFamily: 'Montserrat',
+                        fontSize: '18px',
+                        cssClasses: `
+                            .container {
+                            padding-top: 10px;
+                            }
+                            .card {
+                            background: #121212;
+                            }
+                        `
+                        };
                     const chingupPaymentData = {
+                        mode: 'production',
                         amount: parseFloat(amount),
                         currency: currency,
                         merchant_id: publishableKey,
                         transaction_id: transactionId,
-                        type: "paymentData"
+                        type: "paymentData",
+                        css_config: css_configs,
+                        require_billing_info: true,
                     };
 
                     console.log("📤 Sending payment data to Chingup:", chingupPaymentData);
