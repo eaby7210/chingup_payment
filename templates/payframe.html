@@ -73,7 +73,7 @@
             
                 console.log("✅ Valid payment data received:", JSON.stringify(data, null, 4));
             
-                setTimeout(() => {
+               
                     const iframe = document.createElement('iframe');
                     iframe.id = "payment_iframe";
                     iframe.src = "https://chingup.com/card_payment/";
@@ -83,8 +83,8 @@
                     iframe.style.display = "none";
             
                     iframe.onload = function () {
-                        iframe.style.display = "block"; // ✅ Show after load
-            
+                        iframe.style.display = "block";
+                        loadingMessage.style.display = "none"
                         const css_configs = {
                             primaryColor: '#ff0000',
                             backgroundColor: '#ffffff00',
@@ -103,7 +103,7 @@
             
                         const chingupPaymentData = {
                             mode: 'production',
-                            amount: parseFloat(amount),
+                            amount: amount,
                             currency: currency,
                             merchant_id: publishableKey,
                             transaction_id: transactionId,
@@ -117,7 +117,7 @@
                     };
             
                     iframeContainer.appendChild(iframe); 
-                }, 5000);
+              
             }
             
         });
