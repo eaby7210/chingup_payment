@@ -19,4 +19,4 @@ class OAuthToken(models.Model):
         return now().date() >= self.expires_at
     
     def __str__(self):
-        return f""
+        return f"{self.LocationId}"

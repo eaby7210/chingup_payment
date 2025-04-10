@@ -29,7 +29,7 @@ class OAuthServices:
     @staticmethod
     def get_fresh_token(auth_code):
         '''Exchange authorization code for a fresh access token'''
-        
+        print("reached hereee")
         from django.conf import settings
         
         headers = {
@@ -46,6 +46,7 @@ class OAuthServices:
         token_data = response.json()
         
         if response.status_code == 200:
+            print("success response")
             token_obj, created = OAuthToken.objects.update_or_create(
                 id=1,  # Assuming a single OAuth record
                 defaults={
@@ -62,6 +63,7 @@ class OAuthServices:
             )
             return token_obj.access_token
         else:
+            print("errror response")
             raise ValueError(f"Failed to get fresh access token: {token_data}")
     
     
