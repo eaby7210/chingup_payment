@@ -61,7 +61,7 @@ class OAuthServices:
                     "userId": token_data["userId"],
                 }
             )
-            return token_obj.access_token
+            return token_obj
         else:
             print("errror response")
             raise ValueError(f"Failed to get fresh access token: {token_data}")

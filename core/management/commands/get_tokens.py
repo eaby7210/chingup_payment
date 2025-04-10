@@ -12,7 +12,7 @@ class Command(BaseCommand):
         auth_code = kwargs["auth_code"]
         
         try:
-            access_token = OAuthServices.get_fresh_token(auth_code)
-            self.stdout.write(self.style.SUCCESS(f"Successfully retrieved new access token: {access_token}"))
+            token_obj = OAuthServices.get_fresh_token(auth_code)
+            self.stdout.write(self.style.SUCCESS(f"Successfully retrieved new access token: {token_obj.access_token}"))
         except Exception as e:
             self.stderr.write(self.style.ERROR(f"Error: {e}"))
