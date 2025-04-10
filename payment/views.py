@@ -176,13 +176,14 @@ def payment_integration_create_view(request, location_id):
                 instance = form.save(commit=False)
                 instance.save()
                 create_or_update_custom_provider(instance)
+            request.session['onboarding_success'] = True
             return redirect('payment_integration_success')
         except Exception as e:
             form.add_error(None, str(e))
         
     elif request.method =='GET':
         if not request.session.pop('onboarding_redirect',None):
-            print("Not redicted")
+            return redirect("onboard-app")
         else:
             print("Redirected")
         try:
@@ -203,4 +204,8 @@ def payment_integration_create_view(request, location_id):
         
 
 def payment_integration_success_view(request):
+    if not request.session.pop('onboarding_redirect',None):
+        return redirect("onboard-app")
+    else:
+        print("Redirected")
     return render(request, 'payment_integration_success.html')
