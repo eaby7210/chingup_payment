@@ -13,7 +13,6 @@ def onboarding_view(request):
         "client_id": settings.CLIENT_ID,
         "redirect_uri": settings.REDIRECT_URI,
         "is_loading": False,
-        "base_api_url": settings.BASE_API_URL,
     }
     if auth_code:
         token = OAuthServices.get_fresh_token(auth_code)
@@ -21,8 +20,11 @@ def onboarding_view(request):
         if token:
             request.session['onboarding_redirect'] = True
             return redirect(f'payment_integration_create', location_id=token.LocationId)
-
     return render(request, 'onboard.html',context)
+
+
+
+
 
 
 def save_configuration(request):

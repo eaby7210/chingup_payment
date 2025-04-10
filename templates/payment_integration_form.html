@@ -1,8 +1,16 @@
 {% extends 'index.html' %}
 {% block main %}
-<div class="max-w-xl mx-auto my-10">
-  <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
 
+<div class="max-w-2xl w-full mx-auto relative my-10 px-4 sm:px-6">
+  <!-- Header -->
+  <div class="text-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Connect Your Account</h1>
+    <p class="text-gray-600 mt-2">Powerful integration awaits</p>
+  </div>
+
+  <!-- Main Box -->
+  <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 w-full">
+    
     <!-- Progress Bar -->
     <div class="w-full h-1 bg-gray-100">
       <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 w-1/2"></div>
@@ -61,7 +69,7 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm mb-1">2</div>
-          <span class="text-xs text-indigo-600 font-medium">Payment</span>
+          <span class="text-xs text-indigo-600 font-medium">Integration</span>
         </div>
         <div class="h-0.5 flex-1 bg-gray-200 mx-2">
           <div class="h-full bg-indigo-600 w-0"></div>
@@ -71,8 +79,14 @@
           <span class="text-xs text-gray-500 font-medium">Completion</span>
         </div>
       </div>
-
     </div>
   </div>
+
+  <!-- Security badge -->
+  <div class="flex items-center justify-center mt-4">
+    <i class="lucide lucide-shield-check w-4 h-4 text-gray-500 mr-1"></i>
+    <span class="text-xs text-gray-500">Secure authentication process</span>
+  </div>
 </div>
+
 {% endblock %}

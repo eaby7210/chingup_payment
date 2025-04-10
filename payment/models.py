@@ -24,7 +24,7 @@ class PaymentIntegration(models.Model):
         validators=[validate_https_url],
         help_text="Enter the query endpoint URL (must start with https://)."
     )
-    payments_url = models.URLField(default='',
+    payments_url = models.URLField(default=settings.PAYMENT_URL,
         validators=[validate_https_url],
         help_text="Enter the payments endpoint URL (must start with https://)."
     )

@@ -171,7 +171,9 @@ def payment_integration_create_view(request, location_id):
     form = PaymentIntegrationForm(request.POST or None)
     
     if request.method == 'POST':
+        print("form: ", form)
         if form.is_valid():
+            print("valid form in post")
             try:
                 with transaction.atomic():
                     instance = form.save(commit=False)
@@ -182,7 +184,7 @@ def payment_integration_create_view(request, location_id):
             except Exception as e:
                 form.add_error(None, str(e))
                 
-        
+        print("form 2=============: ", form)
         return render(request, 'payment_integration_form.html', {
             'form': form,
             })
@@ -212,8 +214,6 @@ def payment_integration_create_view(request, location_id):
         
 
 def payment_integration_success_view(request):
-    if not request.session.pop('onboarding_redirect',None):
-        return redirect("onboard-app")
-    else:
-        print("Redirected")
+    print("payment_integration_success")
     return render(request, 'payment_integration_success.html')
+
