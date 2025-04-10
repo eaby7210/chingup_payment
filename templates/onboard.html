@@ -148,6 +148,22 @@
 
     const BASE_API_URL = "{{ base_api_url }}";
     const LOCATION_ID = "{{ locationId }}"
+    const CLIENT_ID = "{{ client_id }}";
+    const REDIRECT_URI = "{{ redirect_uri }}";
+    const PREV = "https://marketplace.gohighlevel.com/oauth/chooselocation";
+
+
+    const scopes = [
+      "payments/orders.readonly",
+      "payments/orders.write",
+      "payments/integration.readonly",
+      "payments/transactions.readonly",
+      "payments/custom-provider.readonly",
+      "payments/custom-provider.write",
+      "payments/integration.write",
+    ];
+
+    const SCOPE = scopes.join(" ");
     console.log("LocationId: ", locationId)
 
     // Add animation classes to tailwind
@@ -177,21 +193,8 @@
       },
     };
 
-    const CLIENT_ID = "{{ client_id }}";
-    const REDIRECT_URI = "{{ redirect_uri }}";
-    const PREV = "https://marketplace.gohighlevel.com/oauth/chooselocation";
 
-    const scopes = [
-      "payments/orders.readonly",
-      "payments/orders.write",
-      "payments/integration.readonly",
-      "payments/transactions.readonly",
-      "payments/custom-provider.readonly",
-      "payments/custom-provider.write",
-      "payments/integration.write",
-    ];
 
-    const SCOPE = scopes.join(" ");
 
     function redirectToExternal() {
       const spinner = document.getElementById("spinner");
