@@ -12,6 +12,7 @@ gunicorn = "*"
 requests = "*"
 psycopg2 = "*"
 django = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
