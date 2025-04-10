@@ -140,6 +140,8 @@ CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 REDIRECT_URI = os.environ.get('REDIRECT_URI')
 
+BASE_API_URL = os.getenv("BASE_API_URL", "http://localhost:8000")
+
 
 # # Chingup Configuration
 CHINGUP_MERCHANT_ID = os.environ.get("MERCHANT_ID")

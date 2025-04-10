@@ -48,7 +48,7 @@ class OAuthServices:
         if response.status_code == 200:
             print("success response")
             token_obj, created = OAuthToken.objects.update_or_create(
-                id=1,  # Assuming a single OAuth record
+                LocationId=token_data["locationId"],
                 defaults={
                     "access_token": token_data["access_token"],
                     "token_type": token_data["token_type"],
@@ -57,7 +57,6 @@ class OAuthServices:
                     "scope": token_data["scope"],
                     "userType": token_data["userType"],
                     "companyId": token_data["companyId"],
-                    "LocationId": token_data["locationId"],
                     "userId": token_data["userId"],
                 }
             )

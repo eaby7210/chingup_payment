@@ -27,24 +27,53 @@
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
       <!-- Progress bar -->
       <div class="w-full h-1 bg-gray-100">
-        <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 w-1/3"></div>
+        <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 {% if auth_code %}w-1/2{% else %}w-1/4{% endif %}"></div>
       </div>
       
       <!-- Content -->
       <div class="p-8">
-        <div class="flex items-start mb-6">
-          <div class="bg-indigo-100 rounded-full p-3 mr-4">
-            <i class="lucide lucide-key text-indigo-600 w-6 h-6"></i>
+        <div id="step-1" {% if auth_code %}class="hidden"{% endif %}>
+          <div class="flex items-start mb-6">
+            <div class="bg-indigo-100 rounded-full p-3 mr-4">
+              <i class="lucide lucide-key text-indigo-600 w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Step 1: Authorization</h2>
+              <p class="text-gray-600 mt-1">Securely connect Vintec with GoHighLevel</p>
+            </div>
           </div>
-          <div>
-            <h2 class="text-xl font-bold text-gray-900">Step 1: Authorization</h2>
-            <p class="text-gray-600 mt-1">Securely connect Vintec with GoHighLevel</p>
+  
+          <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 mb-8">
+            <p class="text-gray-700">Click the button below to securely authenticate with GoHighLevel and connect your account.</p>
           </div>
+  
+          <!-- Authorization Button -->
+          <button id="auth-btn"
+            onclick="redirectToExternal()"
+            class="w-full flex justify-center items-center py-4 px-6 rounded-lg shadow-md text-base font-medium text-white transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600"
+          >
+            <span id="btn-text" class="mr-2">Authenticate with Vintec</span>
+            <i class="lucide lucide-log-in w-5 h-5" id="login-icon"></i>
+            <svg id="spinner" class="ml-2 hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+          </button>
         </div>
 
-        {% if auth_code %}
+        <div id="step-2" {% if not auth_code %}class="hidden"{% endif %}>
+          <div class="flex items-start mb-6">
+            <div class="bg-green-100 rounded-full p-3 mr-4">
+              <i class="lucide lucide-check-circle text-green-600 w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Step 2: Configure Integration</h2>
+              <p class="text-gray-600 mt-1">Complete your setup with Vintec</p>
+            </div>
+          </div>
+
           <!-- Code Received UI -->
-          <div class="mb-8">
+          <div class="mb-6">
             <div class="flex items-center mb-3">
               <div class="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center mr-3">
                 <i class="lucide lucide-check text-white w-4 h-4"></i>
@@ -52,56 +81,57 @@
               <span class="text-green-600 font-semibold">Authorization Successful!</span>
             </div>
             
-            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center justify-between overflow-x-auto">
+            <!-- <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center justify-between overflow-x-auto">
               <code class="text-sm font-mono text-gray-800" id="auth-code">{{ auth_code }}</code>
               <button onclick="copyToClipboard()" id="copy-btn" class="ml-4 bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition-all">
                 <i class="lucide lucide-clipboard w-5 h-5" id="icon-clipboard"></i>
               </button>
-            </div>
-            <p class="text-gray-500 text-sm mt-2">This code will be used in the next step</p>
+            </div> -->
           </div>
-        {% else %}
-          <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 mb-8">
-            <p class="text-gray-700">Click the button below to securely authenticate with GoHighLevel and connect your account.</p>
-          </div>
-        {% endif %}
 
-        <!-- Button -->
-        <button id="auth-btn"
-          onclick="redirectToExternal()"
-          class="w-full flex justify-center items-center py-4 px-6 rounded-lg shadow-md text-base font-medium text-white transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:cursor-not-allowed 
-          {% if auth_code %}bg-gray-400{% else %}bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600{% endif %}"
-          {% if is_loading or auth_code %}disabled{% endif %}
-        >
-          <span id="btn-text" class="mr-2">{% if is_loading %}Redirecting...{% elif auth_code %}Code Received{% else %}Authenticate with Vintec{% endif %}</span>
-          {% if not auth_code %}
-          <i class="lucide lucide-log-in w-5 h-5" id="login-icon"></i>
-          {% endif %}
-          <svg id="spinner" class="ml-2 hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-          </svg>
-        </button>
+          <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-100 mb-6">
+            <p class="text-gray-700">Your account has been successfully connected. Click the button below to configure your integration settings.</p>
+          </div>
+
+          <!-- Configure Button -->
+          <button id="configure-btn"
+            onclick="configureIntegration()"
+            class="w-full flex justify-center items-center py-4 px-6 rounded-lg shadow-md text-base font-medium text-white transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600"
+          >
+            <span class="mr-2">Configure Integration</span>
+            <i class="lucide lucide-settings w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div id="step-3" class="hidden">
+          <div class="flex flex-col items-center justify-center py-8">
+            <div class="bg-green-100 rounded-full p-5 mb-6">
+              <i class="lucide lucide-check-circle text-green-600 w-12 h-12"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Setup Complete!</h2>
+            <p class="text-gray-600 text-center mb-8">Your Vintec integration has been successfully configured and is ready to use.</p>
+            
+            <a href="/dashboard" class="inline-flex items-center justify-center py-3 px-6 rounded-lg shadow-md text-base font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all duration-200">
+              <span class="mr-2">Go to Dashboard</span>
+              <i class="lucide lucide-arrow-right w-5 h-5"></i>
+            </a>
+          </div>
+        </div>
         
         <!-- Steps indicator -->
         <div class="flex items-center justify-between mt-8">
           <div class="flex flex-col items-center">
-            <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm mb-1">1</div>
-            <span class="text-xs text-indigo-600 font-medium">Authorization</span>
+            <div class="w-8 h-8 rounded-full {% if auth_code %}bg-green-600{% else %}bg-indigo-600{% endif %} flex items-center justify-center text-white font-bold text-sm mb-1">
+              {% if auth_code %}<i class="lucide lucide-check w-4 h-4"></i>{% else %}1{% endif %}
+            </div>
+            <span class="text-xs {% if auth_code %}text-green-600{% else %}text-indigo-600{% endif %} font-medium">Authorization</span>
           </div>
           <div class="h-0.5 flex-1 bg-gray-200 mx-2">
-            <div class="h-full bg-indigo-600 w-0"></div>
+            <div class="h-full {% if auth_code %}bg-green-600 w-full{% else %}bg-indigo-600 w-0{% endif %}"></div>
           </div>
           <div class="flex flex-col items-center">
-            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm mb-1">2</div>
-            <span class="text-xs text-gray-500 font-medium">Configuration</span>
-          </div>
-          <div class="h-0.5 flex-1 bg-gray-200 mx-2">
-            <div class="h-full bg-indigo-600 w-0"></div>
-          </div>
-          <div class="flex flex-col items-center">
-            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm mb-1">3</div>
-            <span class="text-xs text-gray-500 font-medium">Completion</span>
+            <div class="w-8 h-8 rounded-full {% if auth_code %}bg-indigo-600{% else %}bg-gray-200{% endif %} flex items-center justify-center {% if auth_code %}text-white{% else %}text-gray-500{% endif %} font-bold text-sm mb-1">2</div>
+            <span class="text-xs {% if auth_code %}text-indigo-600{% else %}text-gray-500{% endif %} font-medium">Configuration</span>
           </div>
         </div>
       </div>
@@ -115,6 +145,11 @@
   </div>
 
   <script>
+
+    const BASE_API_URL = "{{ base_api_url }}";
+    const LOCATION_ID = "{{ locationId }}"
+    console.log("LocationId: ", locationId)
+
     // Add animation classes to tailwind
     tailwind.config = {
       theme: {
@@ -171,23 +206,58 @@
       window.location.href = authUrl;
     }
 
-    function copyToClipboard() {
-      const text = document.getElementById("auth-code").innerText;
-      navigator.clipboard.writeText(text);
-      const icon = document.getElementById("icon-clipboard");
-      icon.classList.replace("lucide-clipboard", "lucide-check");
-      icon.classList.add("text-green-600");
+    function configureIntegration() {
 
-      // Show brief success message
-      const btn = document.getElementById("copy-btn");
-      btn.classList.add("bg-green-100");
+  fetch(`${BASE_API_URL}/core/save-configuration`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ loationId: LOCATION_ID }),
+  })
+  .then(async (response) => {
+    const data = await response.json();
 
-      setTimeout(() => {
-        icon.classList.replace("lucide-check", "lucide-clipboard");
-        icon.classList.remove("text-green-600");
-        btn.classList.remove("bg-green-100");
-      }, 2000);
+    if (response.ok) {
+      // ✅ Success: Show next step and update progress bar
+      document.getElementById("step-2").classList.add("hidden");
+      document.getElementById("step-3").classList.remove("hidden");
+
+      const progressBar = document.querySelector(".bg-gradient-to-r");
+      progressBar.classList.remove("w-1/2");
+      progressBar.classList.add("w-full");
+
+      console.log('Success:', data);
+    } else {
+      // ❌ API responded with error
+      console.error('Server Error:', data);
+      alert(`Failed to configure integration: ${data.message || 'Something went wrong.'}`);
     }
+  })
+  .catch((error) => {
+    // ❌ Network or unexpected error
+    console.error('Network Error:', error);
+    alert('Network error while configuring integration. Please try again.');
+  });
+}
+
+    // function copyToClipboard() {
+    //   const text = document.getElementById("auth-code").innerText;
+    //   navigator.clipboard.writeText(text);
+    //   const icon = document.getElementById("icon-clipboard");
+    //   icon.classList.replace("lucide-clipboard", "lucide-check");
+    //   icon.classList.add("text-green-600");
+
+    //   // Show brief success message
+    //   const btn = document.getElementById("copy-btn");
+    //   btn.classList.add("bg-green-100");
+
+    //   setTimeout(() => {
+    //     icon.classList.replace("lucide-check", "lucide-clipboard");
+    //     icon.classList.remove("text-green-600");
+    //     btn.classList.remove("bg-green-100");
+    //   }, 2000);
+    // }
   </script>
 </body>
 </html>
