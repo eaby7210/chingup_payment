@@ -147,6 +147,9 @@ BASE_API_URL = os.getenv("BASE_API_URL", "http://localhost:8000")
 NAME = os.environ.get('NAME')
 DESCRIPTION = os.environ.get('DESCRIPTION')
 IMAGE_URL = os.environ.get('IMAGE_URL')
+QUERY_URL = os.environ.get('QUERY_URL')
+PAYMENT_URL = os.environ.get('PAYMENT_URL')
+
 CHINGUP_MERCHANT_ID = os.environ.get("MERCHANT_ID")
 CHINGUP_MERCHANT_SANDBOX_ID = os.environ.get("MERCHANT_SANDBOX_ID")
 

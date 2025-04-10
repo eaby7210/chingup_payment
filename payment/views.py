@@ -170,16 +170,24 @@ def payment_integration_create_view(request, location_id):
     """
     form = PaymentIntegrationForm(request.POST or None)
     
-    if request.method == 'POST' and form.is_valid():
-        try:
-            with transaction.atomic():
-                instance = form.save(commit=False)
-                instance.save()
-                create_or_update_custom_provider(instance)
-            request.session['onboarding_success'] = True
-            return redirect('payment_integration_success')
-        except Exception as e:
-            form.add_error(None, str(e))
+    if request.method == 'POST':
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    instance = form.save(commit=False)
+                    instance.save()
+                    create_or_update_custom_provider(instance)
+                request.session['onboarding_success'] = True
+                return redirect('payment_integration_success')
+            except Exception as e:
+                form.add_error(None, str(e))
+                
+        
+        return render(request, 'payment_integration_form.html', {
+            'form': form,
+            })
+            
+        
         
     elif request.method =='GET':
         if not request.session.pop('onboarding_redirect',None):
@@ -189,7 +197,7 @@ def payment_integration_create_view(request, location_id):
         try:
             token_obj:OAuthToken = OAuthServices.get_valid_access_token_obj()
         except OAuthTokenError as e:
-            messages.error(request,e)
+            messages.error(request,str(e))
             return redirect("onboard-app")
             
         form = PaymentIntegrationForm()
