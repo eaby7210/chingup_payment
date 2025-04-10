@@ -181,7 +181,7 @@ def payment_integration_create_view(request, location_id):
             form.add_error(None, str(e))
         
     elif request.method =='GET':
-        if not request.session.get('redirected_from_form'):
+        if not request.session.pop('onboarding_redirect',None):
             print("Not redicted")
         else:
             print("Redirected")

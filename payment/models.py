@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
 from django.core.exceptions import ValidationError
 
 def validate_https_url(value):
@@ -11,11 +12,11 @@ class PaymentIntegration(models.Model):
     location_id = models.CharField(max_length=100, blank=True, null=True)
     marketplace_app_id = models.CharField(max_length=100, blank=True, null=True)
 
-    name = models.CharField(max_length=255,default="")
-    description = models.TextField(default='',blank=True, null=True)
+    name = models.CharField(max_length=255,default=settings.NAME)
+    description = models.TextField(default=settings.DESCRIPTION,blank=True, null=True)
 
 
-    image_url = models.URLField(default='',
+    image_url = models.URLField(default=settings.IMAGE_URL,
       
        
     )
