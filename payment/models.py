@@ -11,19 +11,19 @@ class PaymentIntegration(models.Model):
     location_id = models.CharField(max_length=100, blank=True, null=True)
     marketplace_app_id = models.CharField(max_length=100, blank=True, null=True)
 
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
+    name = models.CharField(max_length=255,default="")
+    description = models.TextField(default='',blank=True, null=True)
 
 
-    image_url = models.URLField(
+    image_url = models.URLField(default='',
       
        
     )
-    query_url = models.URLField(
+    query_url = models.URLField(default='',
         validators=[validate_https_url],
         help_text="Enter the query endpoint URL (must start with https://)."
     )
-    payments_url = models.URLField(
+    payments_url = models.URLField(default='',
         validators=[validate_https_url],
         help_text="Enter the payments endpoint URL (must start with https://)."
     )

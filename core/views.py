@@ -11,7 +11,8 @@ def onboarding_view(request):
     if auth_code:
         token = OAuthServices.get_fresh_token(auth_code)
         if token:
-            return redirect(f'payment_integration_create', chr=token.LocationId)
+            request.session['onboarding_redirect'] = True
+            return redirect(f'payment_integration_create', location_id=token.LocationId)
 
     return render(request, 'onboard.html', {
         "auth_code": auth_code,

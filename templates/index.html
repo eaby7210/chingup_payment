@@ -11,20 +11,105 @@
 
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        {% load bootstrap5 %}
-        {% bootstrap_css %}
-        {% bootstrap_javascript %}
+        <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
         {% block head %}{% endblock head %}
 
     </head>
-    <body>
+    <body class="bg-gradient-to-br from-indigo-50 to-blue-100 min-h-screen flex items-center justify-center p-4">
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-        <header>{%block header %}{%endblock header%}</header>
-        <main class="container-fluid" id="main">{%block main %}{%endblock main%}</main>
-        <footer>{%block footer %}{%endblock footer%}</footer>
+        <div class="max-w-2xl w-full mx-auto relative">
+            <!-- Header -->
+            <div class="text-center mb-6">
+              <h1 class="text-3xl font-bold text-gray-800">Connect Your Account</h1>
+              <p class="text-gray-600 mt-2">Powerful integration awaits</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        {%block main %}{%endblock main%}</div>
+         <!-- Security badge -->
+    <div class="flex items-center justify-center mt-4">
+        <i class="lucide lucide-shield-check w-4 h-4 text-gray-500 mr-1"></i>
+        <span class="text-xs text-gray-500">Secure authentication process</span>
+      </div>
+    </div>
+  
+        <script>
+            // Add animation classes to tailwind
+            tailwind.config = {
+              theme: {
+                extend: {
+                  animation: {
+                    blob: "blob 7s infinite",
+                  },
+                  keyframes: {
+                    blob: {
+                      "0%": {
+                        transform: "translate(0px, 0px) scale(1)",
+                      },
+                      "33%": {
+                        transform: "translate(30px, -50px) scale(1.1)",
+                      },
+                      "66%": {
+                        transform: "translate(-20px, 20px) scale(0.9)",
+                      },
+                      "100%": {
+                        transform: "translate(0px, 0px) scale(1)",
+                      },
+                    },
+                  },
+                },
+              },
+            };
         
-        <script src="" async defer></script>
+            const CLIENT_ID = "{{ client_id }}";
+            const REDIRECT_URI = "{{ redirect_uri }}";
+            const PREV = "https://marketplace.gohighlevel.com/oauth/chooselocation";
+        
+            const scopes = [
+              "payments/orders.readonly",
+              "payments/orders.write",
+              "payments/integration.readonly",
+              "payments/transactions.readonly",
+              "payments/custom-provider.readonly",
+              "payments/custom-provider.write",
+              "payments/integration.write",
+            ];
+        
+            const SCOPE = scopes.join(" ");
+        
+            function redirectToExternal() {
+              const spinner = document.getElementById("spinner");
+              const btnText = document.getElementById("btn-text");
+              const loginIcon = document.getElementById("login-icon");
+        
+              spinner.classList.remove("hidden");
+              if (loginIcon) loginIcon.classList.add("hidden");
+              btnText.textContent = "Redirecting...";
+        
+              const authUrl = `${PREV}?response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&client_id=${encodeURIComponent(CLIENT_ID)}&scope=${encodeURIComponent(SCOPE)}`;
+              window.location.href = authUrl;
+            }
+        
+            function copyToClipboard() {
+              const text = document.getElementById("auth-code").innerText;
+              navigator.clipboard.writeText(text);
+              const icon = document.getElementById("icon-clipboard");
+              icon.classList.replace("lucide-clipboard", "lucide-check");
+              icon.classList.add("text-green-600");
+        
+              // Show brief success message
+              const btn = document.getElementById("copy-btn");
+              btn.classList.add("bg-green-100");
+        
+              setTimeout(() => {
+                icon.classList.replace("lucide-check", "lucide-clipboard");
+                icon.classList.remove("text-green-600");
+                btn.classList.remove("bg-green-100");
+              }, 2000);
+            }
+          </script>
     </body>
 </html>

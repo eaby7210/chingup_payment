@@ -1,11 +1,19 @@
 import json
 import requests
-from django.shortcuts import render
+from django.db import transaction
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.conf import settings
 from .models import PaymentIntegration
+from .forms import PaymentIntegrationForm
+from django.views.generic.edit import CreateView, UpdateView
+from django.urls import reverse_lazy
+from core.services import OAuthServices,OAuthTokenError
+from core.models import OAuthToken
+from django.contrib import messages
+from .services import GHLCustomProviderServices
 
 
 @csrf_exempt
@@ -98,3 +106,101 @@ def payment_verify(request):
     else:
         print("Verification failed:", response_data.get('message'))
         return JsonResponse({"failed": True, "message": response_data.get('message'),},status=400)
+    
+
+
+
+def configure_provider(instance):
+    """
+    Configure provider credentials (live and test).
+    """
+    credential_payload = {
+        "live": {
+            "apiKey": instance.live_apikey,
+            "publishableKey": instance.live_publishablekey,
+        },
+        "test": {
+            "apiKey": instance.test_apikey,
+            "publishableKey": instance.test_publishablekey,
+        }
+    }
+
+    config_response = GHLCustomProviderServices.create_provider_config(payload=credential_payload)
+    if not config_response:
+        raise ValueError("Failed to configure provider credentials.")
+
+
+def create_or_update_custom_provider(instance):
+    """
+    Creates or updates a GHL custom payment provider and configures credentials.
+    """
+    provider_payload = {
+        "name": instance.name,
+        "description": instance.description,
+        "paymentsUrl": instance.payments_url,
+        "queryUrl": instance.query_url,
+        "imageUrl": instance.image_url,
+    }
+
+    response = GHLCustomProviderServices.create_custom_provider_integration(data=provider_payload)
+    if not response:
+        raise ValueError("Failed to create or update custom provider integration.")
+
+    # Map response to model instance fields
+    instance.ghl_id = response.get("_id")
+    instance.location_id = response.get("locationId")
+    instance.marketplace_app_id = response.get("marketplaceAppId")
+    instance.trace_id = response.get("traceId")
+    instance.deleted = response.get("deleted", False)
+
+    provider_config = response.get("providerConfig", {})
+    instance.live_mode = provider_config.get("live", {}).get("liveMode")
+    instance.test_mode = provider_config.get("test", {}).get("liveMode")
+
+    # Save updated instance fields
+    instance.save()
+
+    # Configure credentials
+    configure_provider(instance)
+
+
+def payment_integration_create_view(request, location_id):
+    """
+    View to handle creation of a new payment integration.
+    """
+    form = PaymentIntegrationForm(request.POST or None)
+    
+    if request.method == 'POST' and form.is_valid():
+        try:
+            with transaction.atomic():
+                instance = form.save(commit=False)
+                instance.save()
+                create_or_update_custom_provider(instance)
+            return redirect('payment_integration_success')
+        except Exception as e:
+            form.add_error(None, str(e))
+        
+    elif request.method =='GET':
+        if not request.session.get('redirected_from_form'):
+            print("Not redicted")
+        else:
+            print("Redirected")
+        try:
+            token_obj:OAuthToken = OAuthServices.get_valid_access_token_obj()
+        except OAuthTokenError as e:
+            messages.error(request,e)
+            return redirect("onboard-app")
+            
+        form = PaymentIntegrationForm()
+        if token_obj and token_obj.LocationId ==location_id:
+            print(f"Valid Location{token_obj.LocationId}")
+            return render(request, 'payment_integration_form.html', {
+            'form': form,
+        })
+        else:
+            print("Invalid token")
+            return redirect("onboard-app")
+        
+
+def payment_integration_success_view(request):
+    return render(request, 'payment_integration_success.html')

@@ -38,15 +38,15 @@
         const iframeContainer = document.getElementById('iframe_container');
         const loadingMessage = document.getElementById('loading_message');
 
-        // Notify GHL that iframe is ready
-        console.log("Iframe host ready. Dispatching 'custom_provider_ready' to GHL.");
+       
+        console.log("Iframe host ready. Dispatching 'custom_provider_ready' to Vyntec.");
         window.parent.postMessage(JSON.stringify({ type: 'custom_provider_ready', loaded: true }), "*");
 
-        // 1️⃣ Listen for payment data from GHL
+       
         window.addEventListener("message", function(event) {
             let data = event.data;
 
-            // 2️⃣ Parse if it's a string
+           
             if (typeof data === "string") {
                 try {
                     data = JSON.parse(data);
@@ -62,7 +62,7 @@
                     amount,
                     currency,
                     transactionId,
-                    publishableKey // merchant_id
+                    publishableKey 
                 } = data;
             
                 if (!amount || !transactionId || !publishableKey) {
@@ -139,13 +139,13 @@
 
             if (response && typeof response === 'object' && 'success' in response) {
                 if (response.success) {
-                    console.log("✅ Payment successful. Dispatching to GHL.");
+                    console.log("✅ Payment successful. Dispatching to Vyntec.");
                     window.parent.postMessage(JSON.stringify({
                         type: 'custom_element_success_response',
                         chargeId: String(response.ref_number || response.transaction_id || "N/A"),
                     }), "*");
                 } else {
-                    console.warn("⚠️ Payment failed. Dispatching error to GHL.");
+                    console.warn("⚠️ Payment failed. Dispatching error to Vyntec.");
                     window.parent.postMessage(JSON.stringify({
                         type: 'custom_element_error_response',
                         error: { description: response.message || "Payment failed" }
