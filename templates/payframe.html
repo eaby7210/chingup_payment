@@ -19,127 +19,126 @@
     <div id="iframe_container" style="display: none;">
         <p id="loading_message">Loading payment gateway...</p>
         <iframe
-          id="payment_iframe"
-          src="https://chingup.com/card_payment/index.html"
-          frameborder="0"
-          width="100%"
-          height="600"
-          style="display: none;"
+            id="payment_iframe"
+            src="https://chingup.com/card_payment/index.html"
+            frameborder="0"
+            width="100%"
+            height="600"
+            style="display: none;"
         ></iframe>
-      </div>
-      
-      <script>
+    </div>
+
+    <script>
         const iframeContainer = document.getElementById("iframe_container");
         const loadingMessage = document.getElementById("loading_message");
         const iframe = document.getElementById("payment_iframe");
-      
+
         let lastPaymentData = null;
         let paymentDataSent = false;
-      
-       
+
+        console.log("[init] Script initialized");
+
         window.addEventListener("message", function (event) {
-          if (event.data?.type === "payment_initiate_props") {
-            const {
-              amount,
-              currency,
-              publishableKey,
-              transactionId,
-              css_configs,
-            } = event.data;
-      
-            // Display the iframe loader
-            iframeContainer.style.display = "block";
-            loadingMessage.style.display = "block";
-      
-            // Reset and store the latest data
-          lastPaymentData = {
-              mode: "production",
-              amount: amount,
-              currency: currency,
-              merchant_id: publishableKey,
-              transaction_id: transactionId,
-              type: "paymentData",
-              css_config: css_configs,
-              require_billing_info: true,
-            }; 
+            console.log("[message] Event received:", event.data);
 
+            if (event.data?.type === "payment_initiate_props") {
+                console.log("[message] Received payment initiation request");
 
-          
-      
-            paymentDataSent = false;
-      
-            // Load iframe
-            iframe.style.display = "none";
-            iframe.src = "https://chingup.com/card_payment/index.html";
-          }
+                const {
+                    amount,
+                    currency,
+                    publishableKey,
+                    transactionId,
+                    css_configs,
+                } = event.data;
+
+                // Display the iframe loader
+                iframeContainer.style.display = "block";
+                loadingMessage.style.display = "block";
+
+                // Store the latest data
+                lastPaymentData = {
+                    mode: "production",
+                    amount: amount,
+                    currency: currency,
+                    merchant_id: publishableKey,
+                    transaction_id: transactionId,
+                    type: "paymentData",
+                    css_config: css_configs,
+                    require_billing_info: true,
+                };
+                console.log("[message] Stored payment data:", lastPaymentData);
+
+                paymentDataSent = false;
+
+                // Load iframe (reload to ensure clean state)
+                iframe.style.display = "none";
+                iframe.src = "https://chingup.com/card_payment/index.html";
+                console.log("[message] Iframe reloaded");
+            }
+
+            // Handle iframePing
+            if (event.data?.type === "iframePing") {
+                console.log("[iframe] Ping received from iframe");
+                sendPaymentData();
+                return;
+            }
+
+            // Handle success response
+            if (event.data?.success) {
+                console.log("[iframe] Payment SUCCESS response:", event.data);
+                window.parent.postMessage(
+                    {
+                        type: "custom_element_success_response",
+                        data: {
+                            transactionId: event.data.transaction_id,
+                            message: "Payment Success!",
+                        },
+                    },
+                    "*"
+                );
+                return;
+            }
+
+            // Handle failure response
+            if (event.data?.success === false) {
+                console.log("[iframe] Payment FAILURE response:", event.data);
+                window.parent.postMessage(
+                    {
+                        type: "custom_element_error_response",
+                        data: {
+                            transactionId: event.data.transaction_id,
+                            message: "Payment Failed!",
+                        },
+                    },
+                    "*"
+                );
+                return;
+            }
+
         });
-      
-        // ✅ Send payment data safely after iframe is ready
+
         function sendPaymentData() {
-            console.log("inside send paymentdata")
-            console.log("iframe?.contentWindow:", iframe?.contentWindow);
-console.log("lastPaymentData:", lastPaymentData);
-console.log("paymentDataSent:", paymentDataSent);
+            console.log("[sendPaymentData] Called");
+            console.log("  ↳ iframe.contentWindow:", iframe?.contentWindow);
+            console.log("  ↳ lastPaymentData:", lastPaymentData);
+            console.log("  ↳ paymentDataSent:", paymentDataSent);
 
-          if (iframe?.contentWindow && lastPaymentData && !paymentDataSent) {
-            iframe.contentWindow.postMessage(lastPaymentData, "*");
-            paymentDataSent = true;
-            console.log("[parent] Sent paymentData to iframe");
-          } else {
-            console.warn("[parent] Iframe not ready or already sent or no data");
-          }
+            if (iframe?.contentWindow && lastPaymentData && !paymentDataSent) {
+                iframe.contentWindow.postMessage(lastPaymentData, "*");
+                paymentDataSent = true;
+                console.log("[sendPaymentData] Sent paymentData to iframe");
+            } else {
+                console.warn("[sendPaymentData] ❌ Conditions not met for sending data");
+            }
         }
-      
-        // 🔁 Listen for messages back from the iframe
-        window.addEventListener("message", function (event) {
-          const response = event.data;
-      
-          // ✅ Handle iframe readiness ping
-          if (response?.type === "iframePing") {
-            console.log("[parent] Iframe ping received");
-            sendPaymentData();
-            return;
-          }
-      
-          // ✅ Handle success
-          if (response?.success) {
-            console.log("[parent] Payment successful!", response);
-            window.parent.postMessage(
-              {
-                type: "custom_element_success_response",
-                data: {
-                  transactionId: response.transaction_id,
-                  message: "Payment Success!",
-                },
-              },
-              "*"
-            );
-          }
-      
-          // ❌ Handle failure
-          if (!response?.success) {
-            console.log("[parent] Payment failed!", response);
-            window.parent.postMessage(
-              {
-                type: "custom_element_error_response",
-                data: {
-                  transactionId: response.transaction_id,
-                  message: "Payment Failed!",
-                },
-              },
-              "*"
-            );
-          }
-        });
-      
-        // 🔁 After iframe loads, wait for the ping before sending data
+
         iframe.onload = function () {
-          console.log("[parent] Iframe loaded");
-          iframe.style.display = "block";
-          loadingMessage.style.display = "none";
-          // NOTE: No postMessage here — sendPaymentData will run after ping
+            console.log("[iframe] Iframe loaded");
+            iframe.style.display = "block";
+            loadingMessage.style.display = "none";
+            // Do not send data here — wait for iframePing
         };
-      </script>
-      
+    </script>
 </body>
 </html>
