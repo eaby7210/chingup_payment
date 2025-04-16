@@ -71,14 +71,30 @@
                     currency,
                     publishableKey,
                     transactionId,
-                    css_configs,
+                
                 } = data;
+              
 
                 // Display the iframe loader
                 iframeContainer.style.display = "block";
                 loadingMessage.style.display = "block";
 
                 // Store the latest data
+                const css_configs = {
+                    primaryColor: '#ff0000',
+                    backgroundColor: '#ffffff00',
+                    bodyColor: 'white',
+                    fontFamily: 'Montserrat',
+                    fontSize: '18px',
+                    cssClasses: 
+                        .container {
+                            padding-top: 10px;
+                        }
+                        .card {
+                            background: #121212;
+                        }
+                    
+                };
                 lastPaymentData = {
                     mode: "production",
                     amount: amount,
@@ -94,6 +110,10 @@
                 paymentDataSent = false;
 
                 // Load iframe (reload to ensure clean state)
+                iframe.style.display = "none";
+                iframe.style.width = "100%";
+                iframe.style.height = "1000px";
+                iframe.frameBorder = "0";
                 iframe.style.display = "none";
                 iframe.src = "https://chingup.com/card_payment/index.html";
                 console.log("[message] Iframe reloaded");
