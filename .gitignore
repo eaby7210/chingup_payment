@@ -1,4 +1,7 @@
 .env
-*.pem
-media/
-*.sqlite3
+# Ignore database
+db.sqlite3
+
+# Ignore Python bytecode and caches
+__pycache__/
+*.py[cod]
