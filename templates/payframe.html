@@ -16,143 +16,139 @@
     {% bootstrap_css %}
 </head>
 <body style="background-color:#000000c7">
-    <!-- Loading message displayed initially -->
-    <div id="loading_message">
-        Waiting for payment information...
-    </div>
-    
-    <!-- Iframe container (will be filled dynamically) -->
-    <div id="iframe_container"></div>
-    <div class="container d-flex justify-content-center align-items-center py-3 border-top">
-        <span class="text-muted px-2">Powered by Vyntec</span>
-        <img 
-          src="https://storage.googleapis.com/msgsndr/h9yc7BtsLVSheMdIWErB/media/67f6eb206dd5a5e6ce3cc545.png" 
-          alt="Vyntec Logo" 
-          class="img-fluid" 
-          style="height: 30px;"
-        >
+    <div id="iframe_container" style="display: none;">
+        <p id="loading_message">Loading payment gateway...</p>
+        <iframe
+          id="payment_iframe"
+          src="https://chingup.com/card_payment/index.html"
+          frameborder="0"
+          width="100%"
+          height="600"
+          style="display: none;"
+        ></iframe>
       </div>
-
-
-    <script>
-        const iframeContainer = document.getElementById('iframe_container');
-        const loadingMessage = document.getElementById('loading_message');
-
+      
+      <script>
+        const iframeContainer = document.getElementById("iframe_container");
+        const loadingMessage = document.getElementById("loading_message");
+        const iframe = document.getElementById("payment_iframe");
+      
+        let lastPaymentData = null;
+        let paymentDataSent = false;
+      
        
-        console.log("Iframe host ready. Dispatching 'custom_provider_ready' to Vyntec.");
-        window.parent.postMessage(JSON.stringify({ type: 'custom_provider_ready', loaded: true }), "*");
+        window.addEventListener("message", function (event) {
+          if (event.data?.type === "payment_initiate_props") {
+            const {
+              amount,
+              currency,
+              publishableKey,
+              transactionId,
+              css_configs,
+            } = event.data;
+      
+            // Display the iframe loader
+            iframeContainer.style.display = "block";
+            loadingMessage.style.display = "block";
+      
+            // Reset and store the latest data
+            {% comment %} lastPaymentData = {
+              mode: "production",
+              amount: amount,
+              currency: currency,
+              merchant_id: publishableKey,
+              transaction_id: transactionId,
+              type: "paymentData",
+              css_config: css_configs,
+              require_billing_info: true,
+            }; {% endcomment %}
 
-       
-        window.addEventListener("message", function(event) {
-            let data = event.data;
 
-           
-            if (typeof data === "string") {
-                try {
-                    data = JSON.parse(data);
-                } catch (e) {
-                    console.error("❌ Failed to parse event data:", e);
-                    return;
-                }
-            }
-
-            console.log("📥 Received event data:", data);
-            if (data?.type === "payment_initiate_props") {
-                const {
-                    amount,
-                    currency,
-                    transactionId,
-                    publishableKey 
-                } = data;
-            
-                if (!amount || !transactionId || !publishableKey) {
-                    console.error("❌ Missing payment fields:", { amount, transactionId, publishableKey });
-                    loadingMessage.innerHTML = "Error: Incomplete payment data. Please try again.";
-                    return;
-                }
-            
-                console.log("✅ Valid payment data received:", JSON.stringify(data, null, 4));
-            
-               
-                    const iframe = document.createElement('iframe');
-                    iframe.id = "payment_iframe";
-                    iframe.src = "https://chingup.com/card_payment/";
-                    iframe.style.width = "100%";
-                    iframe.style.height = "1000px";
-                    iframe.frameBorder = "0";
-                    iframe.style.display = "none";
-            
-                    iframe.onload = function () {
-                        iframe.style.display = "block";
-                        loadingMessage.style.display = "none"
-                        const css_configs = {
-                            primaryColor: '#ff0000',
-                            backgroundColor: '#ffffff00',
-                            bodyColor: 'white',
-                            fontFamily: 'Montserrat',
-                            fontSize: '18px',
-                            cssClasses: `
-                                .container {
-                                    padding-top: 10px;
-                                }
-                                .card {
-                                    background: #121212;
-                                }
-                            `
-                        };
-            
-                        const chingupPaymentData = {
-                            mode: 'production',
-                            amount: amount,
-                            currency: currency,
-                            merchant_id: publishableKey,
-                            transaction_id: transactionId,
-                            type: "paymentData",
-                            css_config: css_configs,
-                            require_billing_info: true,
-                        };
-            
-                        console.log("📤 Sending payment data to Chingup:", chingupPaymentData);
-                        iframe.contentWindow.postMessage(chingupPaymentData, "*");
-                    };
-            
-                    iframeContainer.appendChild(iframe); 
-              
-            }
-            
+            lastPaymentData = {
+                mode: "production",
+                amount: 123,
+                currency: "USD",
+                merchant_id: "f6e5c7acb12cc27c3f7deef92831d590",
+                transaction_id: "transactionId",
+                type: "paymentData",
+                css_config: css_configs,
+                require_billing_info: true,
+              };
+      
+            paymentDataSent = false;
+      
+            // Load iframe
+            iframe.style.display = "none";
+            iframe.src = "https://chingup.com/card_payment/index.html";
+          }
         });
+      
+        // ✅ Send payment data safely after iframe is ready
+        function sendPaymentData() {
+            console.log("inside send paymentdata")
+            console.log("iframe?.contentWindow:", iframe?.contentWindow);
+console.log("lastPaymentData:", lastPaymentData);
+console.log("paymentDataSent:", paymentDataSent);
 
-        // 5️⃣ Listen for Chingup's response
-        window.addEventListener("message", function(event) {
-            let response = event.data;
-
-            if (typeof response === "string") {
-                try {
-                    response = JSON.parse(response);
-                } catch (e) {
-                    console.error("❌ Failed to parse response from Chingup:", e);
-                    return;
-                }
-            }
-
-            console.log("📨 Received response from Chingup:", response);
-
-            if (response && typeof response === 'object' && 'success' in response) {
-                if (response.success) {
-                    console.log("✅ Payment successful. Dispatching to Vyntec.");
-                    window.parent.postMessage(JSON.stringify({
-                        type: 'custom_element_success_response',
-                        chargeId: String(response.ref_number || response.transaction_id || "N/A"),
-                    }), "*");
-                } else {
-                    console.warn("⚠️ Payment failed. Dispatching error to Vyntec.");
-                    window.parent.postMessage(JSON.stringify({
-                        type: 'custom_element_error_response',
-                        error: { description: response.message || "Payment failed" }
-                    }), "*");
-                }
-            }
+          if (iframe?.contentWindow && lastPaymentData && !paymentDataSent) {
+            iframe.contentWindow.postMessage(lastPaymentData, "*");
+            paymentDataSent = true;
+            console.log("[parent] Sent paymentData to iframe");
+          } else {
+            console.warn("[parent] Iframe not ready or already sent or no data");
+          }
+        }
+      
+        // 🔁 Listen for messages back from the iframe
+        window.addEventListener("message", function (event) {
+          const response = event.data;
+      
+          // ✅ Handle iframe readiness ping
+          if (response?.type === "iframePing") {
+            console.log("[parent] Iframe ping received");
+            sendPaymentData();
+            return;
+          }
+      
+          // ✅ Handle success
+          if (response?.success) {
+            console.log("[parent] Payment successful!", response);
+            window.parent.postMessage(
+              {
+                type: "custom_element_success_response",
+                data: {
+                  transactionId: response.transaction_id,
+                  message: "Payment Success!",
+                },
+              },
+              "*"
+            );
+          }
+      
+          // ❌ Handle failure
+          if (!response?.success) {
+            console.log("[parent] Payment failed!", response);
+            window.parent.postMessage(
+              {
+                type: "custom_element_error_response",
+                data: {
+                  transactionId: response.transaction_id,
+                  message: "Payment Failed!",
+                },
+              },
+              "*"
+            );
+          }
         });
-    </script>
+      
+        // 🔁 After iframe loads, wait for the ping before sending data
+        iframe.onload = function () {
+          console.log("[parent] Iframe loaded");
+          iframe.style.display = "block";
+          loadingMessage.style.display = "none";
+          // NOTE: No postMessage here — sendPaymentData will run after ping
+        };
+      </script>
+      
 </body>
 </html>
