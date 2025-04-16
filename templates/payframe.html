@@ -40,7 +40,7 @@
 
         window.addEventListener("message", function (event) {
             console.log("[message] Event received:", event.data);
-
+            console.log(event.data)
             if (event.data?.type === "payment_initiate_props") {
                 console.log("[message] Received payment initiation request");
 
