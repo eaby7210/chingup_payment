@@ -54,7 +54,7 @@
             }
 
             console.log("[message] Parsed Event Data:", data);
-            if (event.data?.type === "payment_initiate_props") {
+            if (data?.type === "payment_initiate_props") {
                 console.log("[message] Received payment initiation request");
 
                 const {
@@ -63,7 +63,7 @@
                     publishableKey,
                     transactionId,
                     css_configs,
-                } = event.data;
+                } = data;
 
                 // Display the iframe loader
                 iframeContainer.style.display = "block";
