@@ -129,13 +129,10 @@
             if (data?.success) {
                 console.log("[iframe] Payment SUCCESS response:", data);
                 window.parent.postMessage(
-                    {
-                        type: "custom_element_success_response",
-                        data: {
-                            transactionId: data.transaction_id,
-                            message: "Payment Success!",
-                        },
-                    },
+                    JSON.stringify({
+                        type: 'custom_element_success_response',
+                        chargeId: String(data.ref_number),
+                    }),
                     "*"
                 );
                 return;
@@ -145,13 +142,10 @@
             if (data?.success === false) {
                 console.log("[iframe] Payment FAILURE response:", data);
                 window.parent.postMessage(
-                    {
-                        type: "custom_element_error_response",
-                        data: {
-                            transactionId: data.transaction_id,
-                            message: "Payment Failed!",
-                        },
-                    },
+                    JSON.stringify({
+                        type: 'custom_element_success_response',
+                        chargeId: String(data.ref_number),
+                    }),
                     "*"
                 );
                 return;
