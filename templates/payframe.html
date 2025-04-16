@@ -17,7 +17,13 @@
 </head>
 <body style="background-color:#000000c7">
     <div id="iframe_container" style="display: none; color:#fff">
-        <p id="loading_message">Loading payment gateway...</p>
+        <div id="loading_message" class="text-center py-5 text-white">
+            <div class="spinner-border text-light mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mb-0">Loading payment gateway...</p>
+        </div>
+        
         <iframe
             id="payment_iframe"
             src="https://chingup.com/card_payment/index.html"
