@@ -42,13 +42,13 @@ class OAuthServices:
             'code' : auth_code,
         }
         # print(payload)
-        response =requests.post(TOKEN_URL,headers=headers,data=payload)
+        response = requests.post(TOKEN_URL,headers=headers,data=payload)
         token_data = response.json()
         
         if response.status_code == 200:
             print("success response")
             token_obj, created = OAuthToken.objects.update_or_create(
-                LocationId=token_data["locationId"],
+                id=1,
                 defaults={
                     "access_token": token_data["access_token"],
                     "token_type": token_data["token_type"],
@@ -58,6 +58,7 @@ class OAuthServices:
                     "userType": token_data["userType"],
                     "companyId": token_data["companyId"],
                     "userId": token_data["userId"],
+                    "LocationId":token_data["locationId"]
                 }
             )
             return token_obj
