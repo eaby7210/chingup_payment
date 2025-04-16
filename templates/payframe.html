@@ -119,20 +119,20 @@
             }
 
             // Handle iframePing
-            if (event.data?.type === "iframePing") {
+            if (data?.type === "iframePing") {
                 console.log("[iframe] Ping received from iframe");
                 sendPaymentData();
                 return;
             }
 
             // Handle success response
-            if (event.data?.success) {
-                console.log("[iframe] Payment SUCCESS response:", event.data);
+            if (data?.success) {
+                console.log("[iframe] Payment SUCCESS response:", data);
                 window.parent.postMessage(
                     {
                         type: "custom_element_success_response",
                         data: {
-                            transactionId: event.data.transaction_id,
+                            transactionId: data.transaction_id,
                             message: "Payment Success!",
                         },
                     },
@@ -142,13 +142,13 @@
             }
 
             // Handle failure response
-            if (event.data?.success === false) {
-                console.log("[iframe] Payment FAILURE response:", event.data);
+            if (data?.success === false) {
+                console.log("[iframe] Payment FAILURE response:", data);
                 window.parent.postMessage(
                     {
                         type: "custom_element_error_response",
                         data: {
-                            transactionId: event.data.transaction_id,
+                            transactionId: data.transaction_id,
                             message: "Payment Failed!",
                         },
                     },
@@ -178,7 +178,7 @@
             console.log("[iframe] Iframe loaded");
             iframe.style.display = "block";
             loadingMessage.style.display = "none";
-            // Do not send data here — wait for iframePing
+            //  wait for iframePing
         };
     </script>
 </body>
