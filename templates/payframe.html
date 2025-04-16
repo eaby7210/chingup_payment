@@ -42,6 +42,18 @@
 
         window.addEventListener("message", function (event) {
             console.log("[message] Event received:", event.data);
+            let data = event.data;
+
+            try {
+                if (typeof data === "string") {
+                    data = JSON.parse(data);
+                }
+            } catch (e) {
+                console.warn("[message] Failed to parse message data:", e);
+                return;
+            }
+
+            console.log("[message] Parsed Event Data:", data);
             if (event.data?.type === "payment_initiate_props") {
                 console.log("[message] Received payment initiation request");
 
