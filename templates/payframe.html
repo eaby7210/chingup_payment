@@ -52,7 +52,7 @@
             loadingMessage.style.display = "block";
       
             // Reset and store the latest data
-            {% comment %} lastPaymentData = {
+          lastPaymentData = {
               mode: "production",
               amount: amount,
               currency: currency,
@@ -61,19 +61,10 @@
               type: "paymentData",
               css_config: css_configs,
               require_billing_info: true,
-            }; {% endcomment %}
+            }; 
 
 
-            lastPaymentData = {
-                mode: "production",
-                amount: 123,
-                currency: "USD",
-                merchant_id: "f6e5c7acb12cc27c3f7deef92831d590",
-                transaction_id: "transactionId",
-                type: "paymentData",
-                css_config: css_configs,
-                require_billing_info: true,
-              };
+          
       
             paymentDataSent = false;
       
