@@ -37,6 +37,8 @@
         let paymentDataSent = false;
 
         console.log("[init] Script initialized");
+        console.log("Iframe loaded. Dispatching 'custom_provider_ready' event to GHL.");
+        window.parent.postMessage(JSON.stringify({ type: 'custom_provider_ready', loaded: true }), "*");
 
         window.addEventListener("message", function (event) {
             console.log("[message] Event received:", event.data);
