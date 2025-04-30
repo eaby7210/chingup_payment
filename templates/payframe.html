@@ -68,7 +68,7 @@
                 return;
             }
 
-            console.log("[message] Parsed Event Data:", data);
+            console.log("[message] Parsed Event Data:", JSON.stringify(data));
             if (data?.type === "payment_initiate_props") {
                 console.log("[message] Received payment initiation request");
 
@@ -133,7 +133,7 @@
 
             // Handle success response
             if (data?.success) {
-                console.log("[iframe] Payment SUCCESS response:", data);
+                console.log("[iframe] Payment SUCCESS response:",JSON.stringify(data));
                 window.parent.postMessage(
                     JSON.stringify({
                         type: 'custom_element_success_response',
