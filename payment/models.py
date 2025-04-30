@@ -54,3 +54,27 @@ class PaymentIntegration(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.location_id})"
+
+
+class PaymentVerificationLog(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_live = models.BooleanField(default=False)
+
+
+    request_payload = models.JSONField()
+    api_key = models.CharField(max_length=255)
+    charge_id = models.CharField(max_length=255, null=True, blank=True)
+    transaction_id = models.CharField(max_length=255)
+
+
+    merchant_id = models.CharField(max_length=255)
+
+    response_data = models.JSONField(null=True, blank=True)
+    success = models.BooleanField(default=False)
+    error_message = models.TextField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.timestamp} | {self.transaction_id} | {'LIVE' if self.is_live else 'TEST'}"

@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.conf import settings
-from .models import PaymentIntegration
+from .models import PaymentIntegration, PaymentVerificationLog
 from .forms import PaymentIntegrationForm
 from django.views.generic.edit import CreateView, UpdateView
 from django.urls import reverse_lazy
@@ -66,12 +66,14 @@ def payment_verify(request):
     merchant_id = (
         integration.live_publishablekey if is_live else integration.test_publishablekey
     )
-    # payload = {
-    #         'merchant_id': merchant_id,
-    #         'ref_number': charge_id,
-    #         'transaction_id': transaction_id,
-    #         'api_key': api_key
-    #     }
+    log = PaymentVerificationLog.objects.create(
+        request_payload=data,
+        api_key=api_key,
+        charge_id=charge_id,
+        transaction_id=transaction_id,
+        is_live=is_live,
+        merchant_id=merchant_id,
+    )
     # print("payload:",json.dumps(payload,indent=4))
     # Call external verification API
     try:
@@ -83,23 +85,28 @@ def payment_verify(request):
             'transaction_id': transaction_id,
             'api_key': api_key
         }
-        # payload = {
-        #     'merchant_id': 'f6e5c7acb12cc27c3f7deef92831d590',
-        #     'ref_number': '641368878',
-        #     'transaction_id': '393a93d21eb84764',
-        #     'api_key': 'db8a2e2842e3980e182cd510f509bf47fd92bb4167e6cbc257d09bf9cc97d6f1'
-        # }
+
         print("payload:",json.dumps(payload,indent=4))
         response = requests.post(verification_url, data=payload, timeout=10)
         response.raise_for_status()
         response_data = response.json()
         print("response:",json.dumps(response_data,indent=4))
     except requests.RequestException as e:
-        print("HTTP Request failed:", str(e))
+        msg = f"HTTP Request failed: {str(e)}"
+        print(msg)
+        log.response_data = str(e)
+        log.success = False
+        log.error_message = msg
+        log.save()
         return JsonResponse({'error': 'Payment verification failed'}, status=400)
     except ValueError:
         return JsonResponse({'error': 'Invalid response from payment server'}, status=400)
-    # return JsonResponse({"success": True, "data": payload})
+
+    log.response_data = response_data
+    log.success = response_data.get('status') == 'success'
+    log.error_message = response_data.get('message') if not log.success else None
+    log.save()
+    
     if response_data.get('status') == 'success':
         print("Transaction verified successfully:", response_data.get('data'))
         return JsonResponse({"success": True, "data": response_data.get('data')},status=200)
