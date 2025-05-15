@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>Payment Page</title>
     <style>
         #loading_message {
@@ -47,6 +48,8 @@
         const iframeContainer = document.getElementById("iframe_container");
         const loadingMessage = document.getElementById("loading_message");
         const iframe = document.getElementById("payment_iframe");
+        const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const iframeLogUrl = "{% url 'log_iframe_event' %}";
 
         let lastPaymentData = null;
         let paymentDataSent = false;
@@ -58,7 +61,8 @@
         window.addEventListener("message", function (event) {
             console.log("[message] Event received:", event.data);
             let data = event.data;
-
+            let event_type = "Unknown event type";
+            
             try {
                 if (typeof data === "string") {
                     data = JSON.parse(data);
@@ -70,6 +74,7 @@
 
             console.log("[message] Parsed Event Data:", JSON.stringify(data));
             if (data?.type === "payment_initiate_props") {
+                event_type = "payment_initiate_props";
                 console.log("[message] Received payment initiation request");
 
                 const {
@@ -126,6 +131,7 @@
 
             // Handle iframePing
             if (data?.type === "iframePing") {
+                event_type = "iframePing";
                 console.log("[iframe] Ping received from iframe");
                 sendPaymentData();
                 return;
@@ -133,6 +139,7 @@
 
             // Handle success response
             if (data?.success) {
+                event_type = "payment_success";
                 console.log("[iframe] Payment SUCCESS response:",JSON.stringify(data));
                 window.parent.postMessage(
                     JSON.stringify({
@@ -146,6 +153,7 @@
 
             // Handle failure response
             if (data?.success === false) {
+                event_type = "payment_failure";
                 console.log("[iframe] Payment FAILURE response:", data);
                 window.parent.postMessage(
                     JSON.stringify({
@@ -156,6 +164,18 @@
                 );
                 return;
             }
+            fetch(iframeLogUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrftoken,
+                },
+                body: JSON.stringify({
+                    event_type: event_type,
+                    data: data,
+                }),
+            })
+        
 
         });
 

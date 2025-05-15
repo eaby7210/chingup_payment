@@ -78,3 +78,12 @@ class PaymentVerificationLog(models.Model):
 
     def __str__(self):
         return f"{self.timestamp} | {self.transaction_id} | {'LIVE' if self.is_live else 'TEST'}"
+
+
+class IframeEventLogs(models.Model):
+    event_type = models.CharField(max_length=100)
+    data = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.event_type} at {self.created_at}"

@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.conf import settings
-from .models import PaymentIntegration, PaymentVerificationLog
+from .models import PaymentIntegration, PaymentVerificationLog, IframeEventLogs
 from .forms import PaymentIntegrationForm
 from django.views.generic.edit import CreateView, UpdateView
 from django.urls import reverse_lazy
@@ -99,7 +99,12 @@ def payment_verify(request):
         log.error_message = msg
         log.save()
         return JsonResponse({'error': 'Payment verification failed'}, status=400)
-    except ValueError:
+    except ValueError as e:
+        msg = f"Invalid response from payment server: {str(e)}"
+        log.response_data = str(e)
+        log.success = False
+        log.error_message = msg
+        log.save()
         return JsonResponse({'error': 'Invalid response from payment server'}, status=400)
 
     log.response_data = response_data
@@ -224,3 +229,20 @@ def payment_integration_success_view(request):
     print("payment_integration_success")
     return render(request, 'payment_integration_success.html')
 
+
+def log_iframe_event(request):
+    if request.method == "POST":
+        try:
+            payload = json.loads(request.body)
+            print("Received Payload:", json.dumps(payload, indent=4))
+            event_type = payload.get("event_type", "unknown")
+            data = payload.get("data", {})
+
+            IframeEventLogs.objects.create(
+                event_type=event_type,
+                data=data
+            )
+            return JsonResponse({"message": "Logged successfully"}, status=201)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    return JsonResponse({"error": "Invalid request method"}, status=405)

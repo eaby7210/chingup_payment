@@ -7,5 +7,6 @@ urlpatterns = [
     path("payment/", views.payment_view, name="payment_iframe"),
     path("verify-payment/", views.payment_verify, name="verify_payment"),
     path('integration/success/', views.payment_integration_success_view, name='payment_integration_success'),
+     path("log-iframe-event/", views.log_iframe_event, name="log_iframe_event"),
 
 ]
