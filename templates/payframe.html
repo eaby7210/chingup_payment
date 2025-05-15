@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="csrf-token" content="{{ csrf_token }}">
+   
     <title>Payment Page</title>
     <style>
         #loading_message {
@@ -48,7 +48,6 @@
         const iframeContainer = document.getElementById("iframe_container");
         const loadingMessage = document.getElementById("loading_message");
         const iframe = document.getElementById("payment_iframe");
-        const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const iframeLogUrl = "{% url 'log_iframe_event' %}";
 
         let lastPaymentData = null;
@@ -168,7 +167,7 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRFToken": csrftoken,
+                    "X-CSRFToken": "{{ csrf_token }}",
                 },
                 body: JSON.stringify({
                     event_type: event_type,
