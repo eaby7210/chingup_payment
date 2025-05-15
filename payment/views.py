@@ -229,7 +229,8 @@ def payment_integration_success_view(request):
     print("payment_integration_success")
     return render(request, 'payment_integration_success.html')
 
-
+@csrf_exempt
+@xframe_options_exempt
 def log_iframe_event(request):
     if request.method == "POST":
         try:
