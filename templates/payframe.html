@@ -126,12 +126,14 @@
                 iframe.style.display = "none";
                 iframe.src = "https://chingup.com/card_payment/index.html";
                 console.log("[message] Iframe reloaded");
+                logIframeEvent(event_type, data);
             }
 
             // Handle iframePing
             if (data?.type === "iframePing") {
                 event_type = "iframePing";
                 console.log("[iframe] Ping received from iframe");
+                logIframeEvent(event_type, data);
                 sendPaymentData();
                 return;
             }
@@ -140,6 +142,7 @@
             if (data?.success) {
                 event_type = "payment_success";
                 console.log("[iframe] Payment SUCCESS response:",JSON.stringify(data));
+                logIframeEvent(event_type, data);
                 window.parent.postMessage(
                     JSON.stringify({
                         type: 'custom_element_success_response',
@@ -154,6 +157,7 @@
             if (data?.success === false) {
                 event_type = "payment_failure";
                 console.log("[iframe] Payment FAILURE response:", data);
+                logIframeEvent(event_type, data);
                 window.parent.postMessage(
                     JSON.stringify({
                         type: 'custom_element_success_response',
@@ -163,20 +167,25 @@
                 );
                 return;
             }
-            fetch(iframeLogUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}",
-                },
-                body: JSON.stringify({
-                    event_type: event_type,
-                    data: data,
-                }),
-            })
-        
+            logIframeEvent(event_type, data);
 
         });
+
+        function logIframeEvent(event_type, data) {
+                fetch(iframeLogUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}",
+                    },
+                    body: JSON.stringify({
+                        event_type: event_type,
+                        data: data,
+                    }),
+                }).catch(err => {
+                    console.error("[logIframeEvent] Failed to log event:", err);
+                });
+            }
 
         function sendPaymentData() {
             console.log("[sendPaymentData] Called");
